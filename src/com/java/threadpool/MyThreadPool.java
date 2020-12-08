@@ -1,14 +1,13 @@
 package com.java.threadpool;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class MyThreadPool {
 	private final PoolWorker[] threads;
-	private final Queue<Runnable> queue;
+	private final LinkedBlockingQueue<Runnable> queue;
 
 	public MyThreadPool(int nThreads) {
-		queue = new LinkedList<>();
+		queue = new LinkedBlockingQueue<>(nThreads);
 		threads = new PoolWorker[nThreads];
 
 		for (int i = 0; i < nThreads; i++) {
@@ -18,9 +17,10 @@ public class MyThreadPool {
 	}
 
 	public void execute(Runnable task) {
-		synchronized (queue) {
-			queue.add(task);
-			queue.notify();
+		try {
+			queue.put(task);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }
